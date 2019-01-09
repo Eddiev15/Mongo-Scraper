@@ -1,6 +1,6 @@
 # All the News That's Fit to Scrape - MongoDB Node Express Handlebars
 
-## UCF Coding Bootcamp Week 16 Project
+## UM Coding Bootcamp Week 16 Project
 
 ---
 
