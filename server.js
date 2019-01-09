@@ -1,62 +1,61 @@
 // Dependencies
 var express = require("express");
 var bodyParser = require("body-parser");
-var logger = require("morgan");
-
-// scraper tools
-  // required in api-routes.js
-
-// db set up
 var mongoose = require("mongoose");
+var exphbs = require("express-handlebars");
+// Requiring our Note and Article models
+var Note = require("./models/Note.js");
+var Article = require("./models/Article.js");
 // Set mongoose to leverage built in JavaScript ES6 Promises
 mongoose.Promise = Promise;
-
-
-// local or deployed? Use the right mongo db
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/mongoscraper" );
-
-
-
-// Hook mongoose connection to db
-var db = mongoose.connection;
-
-// Log any mongoose errors
-db.on("error", function(error) {
-  console.log("Mongoose Error: ", error);
-});
-
-// Log a success message when we connect to our mongoDB collection 
-db.once("open", function() {
-  console.log("Mongoose connection successful.");
-});
-
-// Bring in our Article model so we can send Article-classed objects as validated, formatted data to our mongoDB collection.
-var Article = require("./models/article.js");
 
 // Initialize Express
 var app = express();
 
-// Configure app with morgan and body parser
-app.use(logger("dev"));
+// Use body parser with our app
 app.use(bodyParser.urlencoded({
-  extended: false
+   extended: false
 }));
 
-// Static file support with public folder
-app.use(express.static("public"));
+// Make public a static dir
+app.use(express.static(process.cwd() + "/public"));
 
-// Configure Handlebars
-var exphbs = require("express-handlebars");
+// Database configuration with mongoose
+var databaseUri = "mongodb://localhost/mongoosearticles";
+
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI);
+} else {
+  mongoose.connect(databaseUri);
+}
+
+var db = mongoose.connection;
+
+db.on("error", function(error) {
+  console.log("Mongoose Error: ", error);
+});
+
+db.once("open", function() {
+  console.log("Mongoose connection sucessful.");
+});
+
+//set engine and default for handlebars
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
+// Import routes and give the server access to them.
+var router = express.Router();
 
-// get routes here
-require("./routes/html-routes.js")(app);
-require("./routes/api-routes.js")(app);
+// Require routes file pass router object
+require("./config/routes")(router);
 
-var port = 3000;
-// Listen on assigned port
-app.listen(process.env.PORT || port, function() {
-  console.log("App running on port "+port+"!");
+// Have every request go through router middlewar
+app.use(router);
+
+//set port
+var port = process.env.PORT || 3001;
+
+//setup listener
+app.listen(port, function() {
+  console.log("app running on port " + port);
 });

@@ -1,46 +1,35 @@
-/* Article Schema
- * ===================================== */
-
 // Require mongoose
 var mongoose = require("mongoose");
-
-// Create the Schema class
+// Create Schema class
 var Schema = mongoose.Schema;
 
-// Instantiate a new Schema, UserSchema
+// Create article schema
 var ArticleSchema = new Schema({
-  // headline
-  headline: {
+  // title is a required string
+  title: {
     type: String,
-    trim: true
+    required: true,
+    unique: true
   },
-  // link
+  // link is a required string
   link: {
     type: String,
-    trim: true,
+    required: true
   },
-  //summary
-  summary: {
-    type: String,
-    trim: true
+  date: String,
+  saved: {
+    type: Boolean,
+    default: false
   },
-  //notes
-  notes: {
-    type: String,
-    trim: true
-  }
+  // This only saves one note's ObjectId, ref refers to the Note model
+  note: [{
+    type: Schema.Types.ObjectId,
+    ref: "Note"
+  }]
 });
 
-/* CUSTOM METHODS HERE
- * -/-/-/-/-/-/-/-/-/- */
-
-/* Custom Method Format
-    UserSchema.methods.[METHOD NAME HERE ] = function() {
-      // the method's processes go here
-    }; */
-
-// Pass the schema to the Article model
+// Create the Article model with the ArticleSchema
 var Article = mongoose.model("Article", ArticleSchema);
 
-// Export the Article model
+// Export the model
 module.exports = Article;
